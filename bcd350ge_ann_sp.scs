@@ -60,7 +60,7 @@ M2 D G S B ann w=w l=l ad=ad as=as pd=pd ps=ps m=1.443 //nrd=nrd nrs=nrs
 M3 D G S B ann w=w l=l ad=ad as=as pd=pd ps=ps m=1.443 //nrd=nrd nrs=nrs
 M4 D G S B ann w=w l=l ad=ad as=as pd=pd ps=ps m=1.443 //nrd=nrd nrs=nrs
 
-
+//M1 D G S B ann w=w l=l ad=ad as=as pd=pd ps=ps m=5.772 //nrd=nrd nrs=nrs 4x mos multiplier
 
 
 model ann bsim3v3 type=n
