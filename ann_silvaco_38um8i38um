@@ -1,0 +1,98 @@
+# Shenyang Institite of Automation, CAS
+go atlas simflags="-P 8"
+set Filename=AnnularMOSFET
+mesh three.d 
+#space.multi=1.0
+#
+x.mesh loc=0.00 spac=0.10
+x.mesh loc=1.00 spac=0.10
+x.mesh loc=1.50 spac=0.10
+x.mesh loc=2.50 spac=0.10
+x.mesh loc=3.00 spac=0.10
+x.mesh loc=3.80 spac=0.10
+#
+y.mesh loc=-0.0 spac=0.05
+y.mesh loc=0.000 spac=0.005
+y.mesh loc=0.015 spac=0.005
+y.mesh loc=0.165 spac=0.005 
+y.mesh loc=0.170 spac=0.01
+y.mesh loc=1.000 spac=0.01
+#
+z.mesh loc=0.00 spac=0.10
+z.mesh loc=1.00 spac=0.10
+z.mesh loc=1.50 spac=0.10
+z.mesh loc=2.50 spac=0.10
+z.mesh loc=3.00 spac=0.10
+z.mesh loc=3.80 spac=0.10
+#
+region num=1 x.min=0.00 x.max=3.80 y.min=0.00 y.max=0.015 z.min=0.00 z.max=3.80 sio2
+region num=2 x.min=0.00 x.max=3.80 y.min=0.015 y.max=1.00 z.min=0.00 z.max=3.80 silicon
+#
+electrode name=source x.min=0.10 x.max=3.70 y.min=0.015 y.max=0.015 z.min=0.10 z.max=0.80
+electrode name=source x.min=0.10 x.max=0.80 y.min=0.015 y.max=0.015 z.min=0.80 z.max=3.00
+electrode name=source x.min=0.10 x.max=3.70 y.min=0.015 y.max=0.015 z.min=3.00 z.max=3.70
+electrode name=source x.min=3.00 x.max=3.70 y.min=0.015 y.max=0.015 z.min=0.80 z.max=3.00
+electrode name=gate   x.min=1.00 x.max=2.80 y.min=-0.0 y.max=0 z.min=1.00 z.max=1.30
+electrode name=gate   x.min=1.00 x.max=1.30 y.min=-0.0 y.max=0 z.min=1.30 z.max=2.50
+electrode name=gate   x.min=2.50 x.max=2.80 y.min=-0.0 y.max=0 z.min=1.30 z.max=2.50
+electrode name=gate   x.min=1.00 x.max=2.80 y.min=-0.0 y.max=0 z.min=2.50 z.max=2.80
+electrode name=drain  x.min=1.50 x.max=2.30 y.min=0.015 y.max=0.015 z.min=1.50 z.max=2.30
+electrode name=substrate x.min=0.1 x.max=3.70 y.min=1.00 y.max=1.00 z.min=0.10 z.max=3.70
+#
+#substrate
+doping uniform y.min=0.17 y.max=1.00 p.type conc=1E+16
+#channel
+doping region=2 x.min=0.00 x.max=3.80 y.min=0.015 y.max=0.170 z.min=0.00 z.max=3.80 p.type uniform conc=1.3E+17
+#source
+doping region=2 x.min=0.00 x.max=3.80 y.min=0.015 y.max=0.165 z.min=0.00 z.max=0.90 n.type uniform conc=6E+17
+doping region=2 x.min=0.00 x.max=0.90 y.min=0.015 y.max=0.165 z.min=0.90 z.max=2.90 n.type uniform conc=6E+17
+doping region=2 x.min=0.00 x.max=3.80 y.min=0.015 y.max=0.165 z.min=2.90 z.max=3.80 n.type uniform conc=6E+17
+doping region=2 x.min=2.90 x.max=3.80 y.min=0.015 y.max=0.165 z.min=0.90 z.max=2.90 n.type uniform conc=6E+17
+#drain
+doping region=2 x.min=1.40 x.max=2.40 y.min=0.015 y.max=0.165 z.min=1.40 z.max=2.40 n.type uniform conc=6E+17
+
+contact name=gate n.poly
+model cvt consrh print
+#mobmod=2 conmob consrh
+method newton gummel carrier=2
+#
+solve pre
+solve init
+save outf=$'Filename'_init.str
+
+solve vdrain=0.1
+
+#log outf=mos2ex04_01.log
+#solve vgate=-0.1 vstep=0.01 vfinal=1.5 name=gate
+#save outf=mos2ex04_2.str
+solve vdrain=1.0
+solve vdrain=2.0
+solve vdrain=3.0
+solve vdrain=4.0
+solve vdrain=5.0
+log outf=mos2ex04_50.log
+solve vgate=-0.1 vstep=0.01 vfinal=5.0 name=gate
+save outf=mos2ex04_3.str
+solve vgate=2.0
+log outf=IdVd_$"Filename"20.log
+solve vdrain=-0.1 vstep=0.01 vfinal=5.0 name=drain
+log off
+solve vgate=3.0
+log outf=IdVd_$"Filename"30.log
+solve vdrain=-0.1 vstep=0.01 vfinal=5.0 name=drain
+log off
+solve vgate=4.0
+log outf=IdVd_$"Filename"40.log
+solve vdrain=-0.1 vstep=0.01 vfinal=5.0 name=drain
+log off
+
+#extract name="vt" xintercept(maxslope(curve(v."gate",i."drain"))) \
+- ave(v."drain")/2.0
+#extract name="subvt" \
+1.0/slope(maxslope(curve(v."gate",log10(i."drain"))))
+#-overlay mos2ex04_01.log
+tonyplot mos2ex04_50.log 
+tonyplot -overlay IdVd_$"Filename"20.log IdVd_$"Filename"30.log IdVd_$"Filename"40.log
+tonyplot3d $'Filename'_init.str
+
+quit
